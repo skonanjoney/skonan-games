@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🔥 SKONAN SUDOKU</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d1526;color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:14px 10px 28px}.app{width:min(760px,100%);text-align:center}h1{font-size:clamp(34px,8vw,58px);margin:4px 0}.subtitle{color:#aeb8cc;font-size:clamp(17px,4.5vw,28px);margin-bottom:18px}#timer{font-size:clamp(30px,7vw,48px);font-weight:800;margin-bottom:18px}.board{width:min(92vw,650px);aspect-ratio:1;margin:0 auto 22px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);background:#111827;border:4px solid #111827;overflow:hidden}.cell{min-width:0;min-height:0;border:1px solid #9ca3af;background:#fff;color:#111827;display:flex;align-items:center;justify-content:center;font-size:clamp(19px,5.3vw,38px);font-weight:700;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.cell:nth-child(3n){border-right:3px solid #111827}.cell:nth-child(9n){border-right:0}.cell:nth-child(n+19):nth-child(-n+27),.cell:nth-child(n+46):nth-child(-n+54){border-bottom:3px solid #111827}.cell.given{background:#e8edf5;cursor:default}.cell.selected{background:#dbeafe;outline:3px solid #2563eb;outline-offset:-3px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(92vw,650px);margin:auto}button{border:0;border-radius:17px;min-height:72px;padding:8px;color:#fff;font-size:clamp(18px,4.8vw,28px);font-weight:800;cursor:pointer;touch-action:manipulation}button:active{transform:scale(.97)}.check{background:#2563eb}.hint{background:#374151}.clear{background:#dc1f1f}.reset{background:#374151}.solve{background:#159447}.new{background:#374151}.message{min-height:34px;margin:13px auto 0;font-size:17px;font-weight:700}.numpad{width:min(92vw,650px);margin:10px auto 0;display:grid;grid-template-columns:repeat(9,1fr);gap:5px}.numpad button{min-height:46px;border-radius:9px;background:#273247;font-size:19px}@media(max-width:430px){.controls{gap:8px}.controls button{min-height:64px;border-radius:14px}.numpad{gap:3px}.numpad button{min-height:43px}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>🔥 SKONAN SUDOKU</h1>
+<div class="subtitle">Advanced 9×9 Challenge</div>
+<div id="timer">00:00</div>
+<div id="board" class="board" aria-label="Sudoku board"></div>
+<div class="controls">
+<button class="check" onclick="checkPuzzle()">✓ Check</button>
+<button class="hint" onclick="giveHint()">💡 Hint</button>
+<button class="clear" onclick="clearInputs()">⌫ Clear</button>
+<button class="reset" onclick="resetPuzzle()">↻ Reset</button>
+<button class="solve" onclick="solvePuzzle()">Solve</button>
+<button class="new" onclick="newPuzzle()">🎲 New</button>
+</div>
+<div id="message" class="message"></div>
+<div class="numpad">
+<button onclick="enterNumber(1)">1</button><button onclick="enterNumber(2)">2</button><button onclick="enterNumber(3)">3</button><button onclick="enterNumber(4)">4</button><button onclick="enterNumber(5)">5</button><button onclick="enterNumber(6)">6</button><button onclick="enterNumber(7)">7</button><button onclick="enterNumber(8)">8</button><button onclick="enterNumber(9)">9</button>
+</div>
+</div>
+<script>
+'use strict';
+const puzzles=[
+["530070000","600195000","098000060","800060003","400803001","700020006","060000280","000419005","000080079"],
+["000260701","680070090","190004500","820100040","004602900","050003028","009300074","040050036","703018000"],
+["200080300","060070084","030500209","000105408","000000000","402706000","301007040","720040060","004010003"]
+];
+let puzzle=[],solution=[],grid=[],selected=-1,seconds=0,timerId=null;
+function parse(rows){return rows.join('').split('').map(Number)}
+function valid(g,pos,n){let r=Math.floor(pos/9),c=pos%9;for(let x=0;x<9;x++){if(x!==c&&g[r*9+x]===n)return false;if(x!==r&&g[x*9+c]===n)return false}let br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;for(let y=br;y<br+3;y++)for(let x=bc;x<bc+3;x++){let i=y*9+x;if(i!==pos&&g[i]===n)return false}return true}
+function solve(g){let best=-1,cand=null;for(let i=0;i<81;i++){if(g[i])continue;let a=[];for(let n=1;n<=9;n++)if(valid(g,i,n))a.push(n);if(!a.length)return false;if(best<0||a.length<cand.length){best=i;cand=a;if(a.length===1)break}}if(best<0)return true;for(const n of cand){g[best]=n;if(solve(g))return true}g[best]=0;return false}
+function load(){puzzle=parse(puzzles[Math.floor(Math.random()*puzzles.length)]);solution=puzzle.slice();solve(solution);grid=puzzle.slice();selected=-1;seconds=0;stopTimer();updateTimer();render();msg('Select an empty square and enter a number.')}
+function render(){const b=document.getElementById('board');b.innerHTML='';for(let i=0;i<81;i++){const e=document.createElement('div');e.className='cell'+(puzzle[i]?' given':'')+(i===selected?' selected':'');if(grid[i])e.textContent=grid[i];e.onclick=()=>select(i);b.appendChild(e)}}
+function select(i){if(puzzle[i])return;selected=i;if(!timerId)startTimer();render()}
+function enterNumber(n){if(selected<0){msg('First select an empty square.');return}if(puzzle[selected])return;grid[selected]=n;if(!timerId)startTimer();render();msg('')}
+function checkPuzzle(){let wrong=0,empty=0;for(let i=0;i<81;i++){if(puzzle[i])continue;if(!grid[i])empty++;else if(grid[i]!==solution[i])wrong++}if(wrong)msg('❌ '+wrong+' incorrect number'+(wrong===1?'':'s')+'.');else if(empty)msg('✓ Correct so far. '+empty+' square'+(empty===1?'':'s')+' remain.');else{stopTimer();msg('🎉 Congratulations! Solved in '+format(seconds)+'!')}}
+function giveHint(){let a=[];for(let i=0;i<81;i++)if(!puzzle[i]&&grid[i]!==solution[i])a.push(i);if(!a.length){msg('The puzzle is already complete!');return}let i=(selected>=0&&a.includes(selected))?selected:a[Math.floor(Math.random()*a.length)];selected=i;grid[i]=solution[i];if(!timerId)startTimer();render();msg('💡 Hint: a correct number was filled in.')}
+function clearInputs(){for(let i=0;i<81;i++)if(!puzzle[i])grid[i]=0;selected=-1;render();msg('Your entries have been cleared.')}
+function resetPuzzle(){grid=puzzle.slice();selected=-1;seconds=0;stopTimer();updateTimer();render();msg('Puzzle reset.')}
+function solvePuzzle(){grid=solution.slice();stopTimer();render();msg('✓ Puzzle solved.')}
+function newPuzzle(){load()}
+function startTimer(){timerId=setInterval(()=>{seconds++;updateTimer()},1000)}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function format(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function updateTimer(){document.getElementById('timer').textContent=format(seconds)}
+function msg(t){document.getElementById('message').textContent=t}
+document.addEventListener('keydown',e=>{if(selected<0)return;if(e.key>='1'&&e.key<='9')enterNumber(+e.key);else if(e.key==='Backspace'||e.key==='Delete'||e.key==='0'){grid[selected]=0;render()}});
+load();
+</script>
+</body>
+</html>
