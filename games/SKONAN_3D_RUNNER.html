@@ -52,6 +52,7 @@ const W=700,H=450;
 let player={lane:0,jump:0,vy:0};
 let objects=[];
 let score=0,coins=0,level=1;
+let highScore=Number(localStorage.getItem("skonanRunnerHighScore"))||0;
 let running=false,over=false;
 let shield=0,shieldTimer=0;
 let speed=3,spawnTimer=0,frame=0;
