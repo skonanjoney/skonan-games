@@ -238,9 +238,15 @@ function update(){
 }
 
 function endGame(){
- running=false;over=true;beep(120,.3);
-}
+ running=false;
+ over=true;
+ beep(120,.3);
 
+ if(score>highScore){
+   highScore=score;
+   localStorage.setItem("skonanRunnerHighScore",highScore);
+ }
+}
 function draw(){
  road();
  objects.forEach(drawObject);
