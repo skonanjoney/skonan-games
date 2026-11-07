@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b18">
+<title>SKONAN 3D RUNNER</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b18;color:white;font-family:Arial,sans-serif;text-align:center}
+header{padding:16px}
+h1{color:#00eaff;margin:8px}
+p{color:#aab5d0}
+canvas{display:block;width:min(96vw,700px);height:auto;margin:12px auto;background:#101a35;border:2px solid #00eaff;border-radius:12px}
+button{background:#00d9ff;color:#06101c;border:0;border-radius:8px;padding:13px 22px;margin:6px;font-weight:bold;cursor:pointer}
+.controls{margin:12px}
+#score{color:#00eaff;font-size:22px;font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+<h1>🚀 SKONAN 3D RUNNER</h1>
+<p>Dodge obstacles. Survive. Beat your high score!</p>
+<div id="score">Score: 0 | Best: 0</div>
+</header>
+
+<canvas id="game" width="700" height="450"></canvas>
+
+<div>
+<button id="start">START GAME</button>
+<button id="restart">RESTART</button>
+</div>
+
+<div class="controls">
+<button id="left">⬅ LEFT</button>
+<button id="right">RIGHT ➡</button>
+</div>
+<p>Keyboard: use ← → or A and D to move.</p>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const scoreText=document.getElementById("score");
+
+let player={x:350,y:365};
+let obstacles=[];
+let score=0,best=0,speed=3;
+let running=false,gameOver=false;
+let keys={};
+let lastSpawn=0;
+
+try{best=Number(localStorage.getItem("skonan3dBest"))||0}catch(e){}
+
+function drawRoad(){
+  ctx.fillStyle="#101a35";
+  ctx.fillRect(0,0,700,450);
+  ctx.fillStyle="#18264a";
+  ctx.beginPath();
+  ctx.moveTo(180,0);ctx.lineTo(520,0);
+  ctx.lineTo(680,450);ctx.lineTo(20,450);
+  ctx.closePath();ctx.fill();
+
+  ctx.strokeStyle="#00eaff";
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(180,0);ctx.lineTo(20,450);
+  ctx.moveTo(520,0);ctx.lineTo(680,450);
+  ctx.stroke();
+
+  ctx.strokeStyle="#7185aa";
+  ctx.lineWidth=2;
+  for(let i=0;i<6;i++){
+    let y=(i*100+(score*speed)%100);
+    let width=2+y/20;
+    ctx.beginPath();
+    ctx.moveTo(350-width,y);
+    ctx.lineTo(350+width,y);
+    ctx.stroke();
+  }
+}
+
+function drawPlayer(){
+  ctx.fillStyle="#00eaff";
+  ctx.beginPath();
+  ctx.moveTo(player.x,player.y-25);
+  ctx.lineTo(player.x-20,player.y+20);
+  ctx.lineTo(player.x+20,player.y+20);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle="white";
+  ctx.fillRect(player.x-5,player.y-5,10,10);
+}
+
+function drawObstacle(o){
+  ctx.fillStyle="#ff315d";
+  ctx.fillRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
+  ctx.strokeStyle="#ffb3c2";
+  ctx.lineWidth=2;
+  ctx.strokeRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
+}
+
+function spawnObstacle(){
+  const lanes=[270,350,430];
+  obstacles.push({x:lanes[Math.floor(Math.random()*3)],y:-30,size:28});
+}
+
+function update(){
+  if(!running)return;
+
+  if(keys.left)player.x-=6;
+  if(keys.right)player.x+=6;
+  player.x=Math.max(65,Math.min(635,player.x));
+
+  speed=3+score/180;
+  obstacles.forEach(o=>o.y+=speed);
+  obstacles=obstacles.filter(o=>o.y<490);
+
+  if(Date.now()-lastSpawn>Math.max(450,1100-score*3)){
+    spawnObstacle();lastSpawn=Date.now();
+  }
+
+  for(const o of obstacles){
+    if(Math.abs(o.x-player.x)<27 &&
+       Math.abs(o.y-player.y)<30){
+      endGame();
+    }
+  }
+
+  score++;
+  scoreText.textContent=`Score: ${score} | Best: ${best}`;
+}
+
+function draw(){
+  drawRoad();
+  obstacles.forEach(drawObstacle);
+  drawPlayer();
+
+  if(!running && !gameOver){
+    ctx.fillStyle="white";
+    ctx.font="bold 30px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("READY TO RUN?",350,190);
+  }
+
+  if(gameOver){
+    ctx.fillStyle="rgba(0,0,0,.7)";
+    ctx.fillRect(0,0,700,450);
+    ctx.fillStyle="#ff315d";
+    ctx.font="bold 38px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("GAME OVER",350,200);
+    ctx.fillStyle="white";
+    ctx.font="20px Arial";
+    ctx.fillText("Press RESTART to try again",350,240);
+  }
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function startGame(){
+  if(gameOver)return;
+  running=true;
+  lastSpawn=Date.now();
+}
+
+function endGame(){
+  running=false;
+  gameOver=true;
+  if(score>best){
+    best=score;
+    try{localStorage.setItem("skonan3dBest",best)}catch(e){}
+  }
+  scoreText.textContent=`Score: ${score} | Best: ${best}`;
+}
+
+function restartGame(){
+  player.x=350;
+  obstacles=[];
+  score=0;
+  speed=3;
+  gameOver=false;
+  running=true;
+  lastSpawn=Date.now();
+}
+
+document.getElementById("start").onclick=startGame;
+document.getElementById("restart").onclick=restartGame;
+
+document.addEventListener("keydown",e=>{
+  if(["ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();
+  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")keys.left=true;
+  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")keys.right=true;
+});
+document.addEventListener("keyup",e=>{
+  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")keys.left=false;
+  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")keys.right=false;
+});
+
+function holdButton(id,direction){
+  const button=document.getElementById(id);
+  button.addEventListener("pointerdown",e=>{
+    e.preventDefault();keys[direction]=true;
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(event=>{
+    button.addEventListener(event,()=>keys[direction]=false);
+  });
+}
+holdButton("left","left");
+holdButton("right","right");
+
+scoreText.textContent=`Score: 0 | Best: ${best}`;
+loop();
+</script>
+</body>
+</html>
