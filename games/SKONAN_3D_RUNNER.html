@@ -3,26 +3,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#080b18">
 <title>SKONAN 3D RUNNER</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080b18;color:white;font-family:Arial,sans-serif;text-align:center}
-header{padding:16px}
-h1{color:#00eaff;margin:8px}
-p{color:#aab5d0}
-canvas{display:block;width:min(96vw,700px);height:auto;margin:12px auto;background:#101a35;border:2px solid #00eaff;border-radius:12px}
-button{background:#00d9ff;color:#06101c;border:0;border-radius:8px;padding:13px 22px;margin:6px;font-weight:bold;cursor:pointer}
-.controls{margin:12px}
-#score{color:#00eaff;font-size:22px;font-weight:bold}
+body{margin:0;background:#070b18;color:white;font-family:Arial;text-align:center}
+header{padding:14px}
+h1{color:#00eaff;text-shadow:0 0 15px #00eaff;margin:8px}
+.stats{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;color:#00eaff;font-weight:bold}
+canvas{width:min(96vw,700px);height:auto;background:#101a35;border:2px solid #00eaff;border-radius:14px;display:block;margin:10px auto;touch-action:none}
+button{padding:13px 20px;margin:5px;border:0;border-radius:9px;background:linear-gradient(90deg,#00eaff,#8b5cf6);font-weight:bold;color:#06101c;cursor:pointer}
+.controls{margin:8px}
+footer{color:#8291b2;padding:12px;font-size:13px}
 </style>
 </head>
 <body>
 <header>
 <h1>🚀 SKONAN 3D RUNNER</h1>
-<p>Dodge obstacles. Survive. Beat your high score!</p>
-<div id="score">Score: 0 | Best: 0</div>
+<p>DODGE • COLLECT • SURVIVE</p>
+<div class="stats">
+<span id="score">Score: 0</span>
+<span id="coins">Coins: 0</span>
+<span id="level">Level: 1</span>
+<span id="lives">Shield: OFF</span>
+</div>
 </header>
 
 <canvas id="game" width="700" height="450"></canvas>
@@ -30,189 +35,270 @@ button{background:#00d9ff;color:#06101c;border:0;border-radius:8px;padding:13px 
 <div>
 <button id="start">START GAME</button>
 <button id="restart">RESTART</button>
+<button id="sound">SOUND: ON</button>
 </div>
-
 <div class="controls">
 <button id="left">⬅ LEFT</button>
+<button id="jump">⬆ JUMP</button>
 <button id="right">RIGHT ➡</button>
 </div>
-<p>Keyboard: use ← → or A and D to move.</p>
+<footer>Keyboard: ← → to move, SPACE to jump. Collect coins and avoid obstacles.</footer>
 
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-const scoreText=document.getElementById("score");
+const W=700,H=450;
 
-let player={x:350,y:365};
-let obstacles=[];
-let score=0,best=0,speed=3;
-let running=false,gameOver=false;
-let keys={};
-let lastSpawn=0;
+let player={lane:0,jump:0,vy:0};
+let objects=[];
+let score=0,coins=0,level=1;
+let running=false,over=false;
+let shield=0,shieldTimer=0;
+let speed=3,spawnTimer=0,frame=0;
+let soundOn=true;
+let keys={left:false,right:false};
+let audio;
 
-try{best=Number(localStorage.getItem("skonan3dBest"))||0}catch(e){}
+const lanes=[-1,0,1];
+const $=id=>document.getElementById(id);
 
-function drawRoad(){
-  ctx.fillStyle="#101a35";
-  ctx.fillRect(0,0,700,450);
-  ctx.fillStyle="#18264a";
+function beep(freq=500,duration=.08){
+ if(!soundOn)return;
+ try{
+  audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+  const o=audio.createOscillator();
+  const g=audio.createGain();
+  o.frequency.value=freq;
+  g.gain.value=.04;
+  o.connect(g);g.connect(audio.destination);
+  o.start();o.stop(audio.currentTime+duration);
+ }catch(e){}
+}
+
+function road(){
+ ctx.fillStyle="#080d1e";ctx.fillRect(0,0,W,H);
+
+ // distant skyline
+ for(let i=0;i<18;i++){
+  let x=i*45;
+  let height=35+(i*37%70);
+  ctx.fillStyle=i%2?"#121c3b":"#192448";
+  ctx.fillRect(x,105-height,30,height);
+  ctx.fillStyle="#00eaff";
+  for(let y=110-height;y<100;y+=15)ctx.fillRect(x+7,y,3,4);
+ }
+
+ // perspective road
+ ctx.fillStyle="#101b3a";
+ ctx.beginPath();
+ ctx.moveTo(265,100);ctx.lineTo(435,100);
+ ctx.lineTo(650,450);ctx.lineTo(50,450);
+ ctx.closePath();ctx.fill();
+
+ ctx.strokeStyle="#00eaff";
+ ctx.lineWidth=4;
+ ctx.beginPath();
+ ctx.moveTo(265,100);ctx.lineTo(50,450);
+ ctx.moveTo(435,100);ctx.lineTo(650,450);
+ ctx.stroke();
+
+ // moving lane markings
+ for(let i=0;i<9;i++){
+  let t=(i/9+(frame*speed/1300))%1;
+  let y=100+t*t*350;
+  let width=2+t*4;
+  let center=350;
+  ctx.strokeStyle="#7388bb";
+  ctx.lineWidth=width;
   ctx.beginPath();
-  ctx.moveTo(180,0);ctx.lineTo(520,0);
-  ctx.lineTo(680,450);ctx.lineTo(20,450);
-  ctx.closePath();ctx.fill();
-
-  ctx.strokeStyle="#00eaff";
-  ctx.lineWidth=3;
-  ctx.beginPath();
-  ctx.moveTo(180,0);ctx.lineTo(20,450);
-  ctx.moveTo(520,0);ctx.lineTo(680,450);
+  ctx.moveTo(center-width*2,y);
+  ctx.lineTo(center+width*2,y);
   ctx.stroke();
+ }
+}
 
-  ctx.strokeStyle="#7185aa";
-  ctx.lineWidth=2;
-  for(let i=0;i<6;i++){
-    let y=(i*100+(score*speed)%100);
-    let width=2+y/20;
-    ctx.beginPath();
-    ctx.moveTo(350-width,y);
-    ctx.lineTo(350+width,y);
-    ctx.stroke();
-  }
+function laneX(lane,y){
+ let t=(y-100)/350;
+ return 350+lane*(25+t*95);
 }
 
 function drawPlayer(){
-  ctx.fillStyle="#00eaff";
+ let x=laneX(player.lane,365);
+ let y=365-player.jump;
+
+ // shadow
+ ctx.fillStyle="#0008";
+ ctx.beginPath();ctx.ellipse(x,390,23,8,0,0,Math.PI*2);ctx.fill();
+
+ // legs
+ ctx.strokeStyle="#00eaff";ctx.lineWidth=9;ctx.lineCap="round";
+ let swing=Math.sin(frame*.22)*9;
+ ctx.beginPath();
+ ctx.moveTo(x-7,y+10);ctx.lineTo(x-10+swing,y+29);
+ ctx.moveTo(x+7,y+10);ctx.lineTo(x+10-swing,y+29);
+ ctx.stroke();
+
+ // body
+ ctx.fillStyle="#123d65";
+ ctx.fillRect(x-13,y-12,26,28);
+ ctx.strokeStyle="#00eaff";ctx.lineWidth=3;
+ ctx.strokeRect(x-13,y-12,26,28);
+
+ // head and helmet
+ ctx.fillStyle="#e5f5ff";
+ ctx.beginPath();ctx.arc(x,y-24,12,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#00eaff";
+ ctx.fillRect(x-10,y-28,20,6);
+
+ // shield aura
+ if(shield>0){
+  ctx.strokeStyle="#a855f7";ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(x,y,39,0,Math.PI*2);ctx.stroke();
+ }
+}
+
+function drawObject(o){
+ let x=laneX(o.lane,o.y);
+ let t=(o.y-100)/350;
+ let size=12+t*27;
+
+ if(o.type==="coin"){
+  ctx.fillStyle="#ffd700";
+  ctx.beginPath();ctx.arc(x,o.y,size*.55,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#fff4a0";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#805600";ctx.font=`bold ${size}px Arial`;
+  ctx.textAlign="center";ctx.fillText("$",x,o.y+size*.3);
+ }else if(o.type==="shield"){
+  ctx.fillStyle="#9b5cff";
   ctx.beginPath();
-  ctx.moveTo(player.x,player.y-25);
-  ctx.lineTo(player.x-20,player.y+20);
-  ctx.lineTo(player.x+20,player.y+20);
+  ctx.moveTo(x,o.y-size);ctx.lineTo(x+size,o.y);
+  ctx.lineTo(x,o.y+size);ctx.lineTo(x-size,o.y);
   ctx.closePath();ctx.fill();
-  ctx.fillStyle="white";
-  ctx.fillRect(player.x-5,player.y-5,10,10);
-}
-
-function drawObstacle(o){
+  ctx.fillStyle="white";ctx.font="bold 15px Arial";
+  ctx.textAlign="center";ctx.fillText("S",x,o.y+5);
+ }else{
   ctx.fillStyle="#ff315d";
-  ctx.fillRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
-  ctx.strokeStyle="#ffb3c2";
-  ctx.lineWidth=2;
-  ctx.strokeRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
+  ctx.fillRect(x-size,o.y-size,size*2,size*2);
+  ctx.strokeStyle="#ffb1c2";ctx.lineWidth=3;
+  ctx.strokeRect(x-size,o.y-size,size*2,size*2);
+ }
 }
 
-function spawnObstacle(){
-  const lanes=[270,350,430];
-  obstacles.push({x:lanes[Math.floor(Math.random()*3)],y:-30,size:28});
+function spawn(){
+ let lane=lanes[Math.floor(Math.random()*3)];
+ let r=Math.random();
+ let type=r<.57?"obstacle":r<.94?"coin":"shield";
+ objects.push({lane,y:110,type});
 }
 
 function update(){
-  if(!running)return;
+ if(!running)return;
+ frame++;
+ score+=1;
+ level=1+Math.floor(score/500);
+ speed=3+level*.45;
 
-  if(keys.left)player.x-=6;
-  if(keys.right)player.x+=6;
-  player.x=Math.max(65,Math.min(635,player.x));
+ if(keys.left){player.lane=Math.max(-1,player.lane-1);keys.left=false;beep(300)}
+ if(keys.right){player.lane=Math.min(1,player.lane+1);keys.right=false;beep(400)}
 
-  speed=3+score/180;
-  obstacles.forEach(o=>o.y+=speed);
-  obstacles=obstacles.filter(o=>o.y<490);
+ player.jump+=player.vy;
+ if(player.jump>0){player.vy-=.8}
+ else{player.jump=0;player.vy=0}
 
-  if(Date.now()-lastSpawn>Math.max(450,1100-score*3)){
-    spawnObstacle();lastSpawn=Date.now();
+ if(shieldTimer>0){shieldTimer--;if(shieldTimer===0)shield=0}
+
+ spawnTimer++;
+ if(spawnTimer>Math.max(24,75-level*4)){
+  spawn();spawnTimer=0;
+ }
+
+ for(let o of objects)o.y+=speed;
+
+ objects=objects.filter(o=>{
+  if(o.y>330&&o.y<410&&o.lane===player.lane){
+   if(o.type==="coin"){
+    coins++;beep(850);return false;
+   }
+   if(o.type==="shield"){
+    shield=1;shieldTimer=450;beep(1000);return false;
+   }
+   if(o.type==="obstacle"){
+    if(shield){shield=0;shieldTimer=0;beep(180);return false}
+    endGame();return false;
+   }
   }
+  return o.y<470;
+ });
 
-  for(const o of obstacles){
-    if(Math.abs(o.x-player.x)<27 &&
-       Math.abs(o.y-player.y)<30){
-      endGame();
-    }
-  }
-
-  score++;
-  scoreText.textContent=`Score: ${score} | Best: ${best}`;
-}
-
-function draw(){
-  drawRoad();
-  obstacles.forEach(drawObstacle);
-  drawPlayer();
-
-  if(!running && !gameOver){
-    ctx.fillStyle="white";
-    ctx.font="bold 30px Arial";
-    ctx.textAlign="center";
-    ctx.fillText("READY TO RUN?",350,190);
-  }
-
-  if(gameOver){
-    ctx.fillStyle="rgba(0,0,0,.7)";
-    ctx.fillRect(0,0,700,450);
-    ctx.fillStyle="#ff315d";
-    ctx.font="bold 38px Arial";
-    ctx.textAlign="center";
-    ctx.fillText("GAME OVER",350,200);
-    ctx.fillStyle="white";
-    ctx.font="20px Arial";
-    ctx.fillText("Press RESTART to try again",350,240);
-  }
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-function startGame(){
-  if(gameOver)return;
-  running=true;
-  lastSpawn=Date.now();
+ $("score").textContent="Score: "+score;
+ $("coins").textContent="Coins: "+coins;
+ $("level").textContent="Level: "+level;
+ $("lives").textContent=shield?"Shield: ON":"Shield: OFF";
 }
 
 function endGame(){
-  running=false;
-  gameOver=true;
-  if(score>best){
-    best=score;
-    try{localStorage.setItem("skonan3dBest",best)}catch(e){}
-  }
-  scoreText.textContent=`Score: ${score} | Best: ${best}`;
+ running=false;over=true;beep(120,.3);
 }
 
-function restartGame(){
-  player.x=350;
-  obstacles=[];
-  score=0;
-  speed=3;
-  gameOver=false;
-  running=true;
-  lastSpawn=Date.now();
+function draw(){
+ road();
+ objects.forEach(drawObject);
+ drawPlayer();
+
+ if(!running){
+  ctx.fillStyle="#0009";ctx.fillRect(0,0,W,H);
+  ctx.textAlign="center";
+  ctx.fillStyle=over?"#ff315d":"#00eaff";
+  ctx.font="bold 36px Arial";
+  ctx.fillText(over?"GAME OVER":"READY TO RUN",350,200);
+  ctx.fillStyle="white";ctx.font="18px Arial";
+  ctx.fillText(over?"Press RESTART to try again":"Press START GAME to begin",350,240);
+ }
 }
 
-document.getElementById("start").onclick=startGame;
-document.getElementById("restart").onclick=restartGame;
+function loop(){
+ update();draw();requestAnimationFrame(loop);
+}
+
+function start(){
+ if(over)return;
+ running=true;beep(600);
+}
+function restart(){
+ player={lane:0,jump:0,vy:0};
+ objects=[];score=0;coins=0;level=1;
+ shield=0;shieldTimer=0;speed=3;
+ frame=0;spawnTimer=0;over=false;running=true;
+ beep(650);
+}
+
+function jump(){
+ if(player.jump===0){
+  player.vy=13;beep(700);
+ }
+}
+
+$("start").onclick=start;
+$("restart").onclick=restart;
+$("jump").onclick=jump;
+$("sound").onclick=()=>{
+ soundOn=!soundOn;
+ $("sound").textContent="SOUND: "+(soundOn?"ON":"OFF");
+};
+
+$("left").onpointerdown=()=>keys.left=true;
+$("right").onpointerdown=()=>keys.right=true;
 
 document.addEventListener("keydown",e=>{
-  if(["ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();
-  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")keys.left=true;
-  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")keys.right=true;
-});
-document.addEventListener("keyup",e=>{
-  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")keys.left=false;
-  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")keys.right=false;
+ if(["ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();
+ if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")keys.left=true;
+ if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")keys.right=true;
+ if(e.code==="Space")jump();
 });
 
-function holdButton(id,direction){
-  const button=document.getElementById(id);
-  button.addEventListener("pointerdown",e=>{
-    e.preventDefault();keys[direction]=true;
-  });
-  ["pointerup","pointerleave","pointercancel"].forEach(event=>{
-    button.addEventListener(event,()=>keys[direction]=false);
-  });
-}
-holdButton("left","left");
-holdButton("right","right");
+$("left").addEventListener("pointerup",()=>keys.left=false);
+$("right").addEventListener("pointerup",()=>keys.right=false);
 
-scoreText.textContent=`Score: 0 | Best: ${best}`;
 loop();
 </script>
 </body>
