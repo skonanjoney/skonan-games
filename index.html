@@ -36,7 +36,21 @@
   "inLanguage": "en"
 }
 </script>
+/* SKONAN 3D RUNNER CARD EFFECT */
+#games-3d .card {
+  transition: transform .3s ease, box-shadow .3s ease;
+}
 
+#games-3d .card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 25px #00eaff55,
+              0 0 45px #8b5cf633;
+}
+
+#games-3d .game-art {
+  overflow: hidden;
+  border-bottom: 1px solid #00eaff55;
+}
 <style>
 :root {
   --bg:#080b18;
