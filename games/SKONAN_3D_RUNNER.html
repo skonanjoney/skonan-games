@@ -278,6 +278,13 @@ function restart(){
  objects=[];score=0;coins=0;level=1;
  shield=0;shieldTimer=0;speed=3;
  frame=0;spawnTimer=0;over=false;running=true;
+
+ $("score").textContent="Score: "+score;
+ $("highScore").textContent="🏆 Best: "+highScore;
+ $("coins").textContent="Coins: "+coins;
+ $("level").textContent="Level: "+level;
+ $("lives").textContent="Shield: OFF";
+
  beep(650);
 }
 
