@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b18">
+<title>SKONAN SNAKE | SKONAN GAMES</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;background:#080b18;color:#fff;
+ font-family:Arial,sans-serif;text-align:center;
+ display:flex;justify-content:center;align-items:center;
+ padding:20px;
+}
+.game{width:100%;max-width:500px}
+h1{color:#54e5ff;text-shadow:0 0 15px #54e5ff;letter-spacing:3px}
+p{color:#aab5d0}
+.stats{display:flex;justify-content:space-around;margin:18px 0}
+.stat{background:#111a30;padding:12px 20px;border:1px solid #263c62;border-radius:10px}
+.stat span{display:block;color:#54e5ff;font-size:23px;margin-top:5px}
+canvas{
+ width:100%;max-width:420px;aspect-ratio:1;
+ background:#0c1427;border:2px solid #54e5ff;
+ border-radius:12px;box-shadow:0 0 20px #54e533;
+ display:block;margin:auto;touch-action:none;
+}
+button{
+ background:#111a30;color:#54e5ff;border:1px solid #54e5ff;
+ padding:12px 20px;border-radius:9px;font-size:16px;
+ cursor:pointer;margin:5px;
+}
+button:hover{background:#54e5ff;color:#080b18}
+.controls{
+ display:grid;grid-template-columns:repeat(3,65px);
+ justify-content:center;gap:7px;margin:18px auto;
+}
+.controls button{margin:0;padding:13px;font-size:22px}
+#message{min-height:25px;color:#a18aff;font-weight:bold}
+a{color:#54e5ff;text-decoration:none}
+</style>
+</head>
+<body>
+<main class="game">
+<h1>🐍 SKONAN SNAKE</h1>
+<p>Eat. Grow. Survive. Beat your high score!</p>
+
+<div class="stats">
+ <div class="stat">SCORE<span id="score">0</span></div>
+ <div class="stat">BEST<span id="best">0</span></div>
+</div>
+
+<canvas id="board" width="400" height="400"></canvas>
+
+<p id="message">Press START to play</p>
+<button onclick="startGame()">▶ START / RESTART</button>
+<button onclick="pauseGame()">Ⅱ PAUSE</button>
+
+<div class="controls">
+ <span></span>
+ <button onclick="changeDirection('up')">▲</button>
+ <span></span>
+ <button onclick="changeDirection('left')">◀</button>
+ <button onclick="changeDirection('down')">▼</button>
+ <button onclick="changeDirection('right')">▶</button>
+</div>
+
+<p>Keyboard: Arrow keys or WASD</p>
+<p><a href="../index.html">← BACK TO SKONAN GAMES</a></p>
+</main>
+
+<script>
+const canvas=document.getElementById("board");
+const ctx=canvas.getContext("2d");
+const scoreEl=document.getElementById("score");
+const bestEl=document.getElementById("best");
+const message=document.getElementById("message");
+
+const size=20;
+const cells=20;
+let snake,food,direction,nextDirection,score;
+let timer=null;
+let running=false;
+let paused=false;
+
+let best=Number(localStorage.getItem("skonanSnakeBest"))||0;
+bestEl.textContent=best;
+
+function randomFood(){
+ let point;
+ do{
+  point={
+   x:Math.floor(Math.random()*cells),
+   y:Math.floor(Math.random()*cells)
+  };
+ }while(snake.some(s=>s.x===point.x&&s.y===point.y));
+ return point;
+}
+
+function startGame(){
+ clearInterval(timer);
+ snake=[
+  {x:10,y:10},
+  {x:9,y:10},
+  {x:8,y:10}
+ ];
+ direction="right";
+ nextDirection="right";
+ score=0;
+ food=randomFood();
+ running=true;
+ paused=false;
+ scoreEl.textContent=score;
+ message.textContent="Game started! Good luck!";
+ draw();
+ timer=setInterval(update,150);
+}
+
+function pauseGame(){
+ if(!running)return;
+ paused=!paused;
+ message.textContent=paused?"Game paused":"Game resumed";
+ if(paused){
+  clearInterval(timer);
+ }else{
+  timer=setInterval(update,Math.max(65,150-score));
+ }
+}
+
+function changeDirection(d){
+ const opposite={
+  up:"down",down:"up",
+  left:"right",right:"left"
+ };
+ if(d!==opposite[direction]){
+  nextDirection=d;
+ }
+}
+
+document.addEventListener("keydown",e=>{
+ const keys={
+  ArrowUp:"up",w:"up",W:"up",
+  ArrowDown:"down",s:"down",S:"down",
+  ArrowLeft:"left",a:"left",A:"left",
+  ArrowRight:"right",d:"right",D:"right"
+ };
+ if(keys[e.key]){
+  e.preventDefault();
+  changeDirection(keys[e.key]);
+ }
+ if(e.key===" "){
+  e.preventDefault();
+  if(!running)startGame();
+  else pauseGame();
+ }
+});
+
+function update(){
+ if(!running||paused)return;
+
+ direction=nextDirection;
+
+ const head={...snake[0]};
+
+ if(direction==="up")head.y--;
+ if(direction==="down")head.y++;
+ if(direction==="left")head.x--;
+ if(direction==="right")head.x++;
+
+ const eating=head.x===food.x&&head.y===food.y;
+
+ if(
+  head.x<0||head.x>=cells||
+  head.y<0||head.y>=cells||
+  snake.slice(0,eating?snake.length:snake.length-1)
+    .some(s=>s.x===head.x&&s.y===head.y)
+ ){
+  gameOver();
+  return;
+ }
+
+ snake.unshift(head);
+
+ if(eating){
+  score+=10;
+  scoreEl.textContent=score;
+  if(score>best){
+   best=score;
+   bestEl.textContent=best;
+   localStorage.setItem("skonanSnakeBest",best);
+  }
+  food=randomFood();
+  clearInterval(timer);
+  timer=setInterval(update,Math.max(65,150-score));
+ }else{
+  snake.pop();
+ }
+
+ draw();
+}
+
+function draw(){
+ ctx.fillStyle="#0c1427";
+ ctx.fillRect(0,0,400,400);
+
+ ctx.strokeStyle="#17243c";
+ ctx.lineWidth=1;
+ for(let i=0;i<=400;i+=size){
+  ctx.beginPath();
+  ctx.moveTo(i,0);ctx.lineTo(i,400);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0,i);ctx.lineTo(400,i);ctx.stroke();
+ }
+
+ ctx.shadowBlur=15;
+ ctx.shadowColor="#ff477e";
+ ctx.fillStyle="#ff477e";
+ ctx.beginPath();
+ ctx.arc(food.x*size+10,food.y*size+10,8,0,Math.PI*2);
+ ctx.fill();
+
+ snake.forEach((part,index)=>{
+  ctx.shadowColor=index===0?"#54e5ff":"#a18aff";
+  ctx.shadowBlur=12;
+  ctx.fillStyle=index===0?"#54e5ff":"#a18aff";
+  ctx.fillRect(part.x*size+2,part.y*size+2,16,16);
+ });
+ ctx.shadowBlur=0;
+}
+
+function gameOver(){
+ clearInterval(timer);
+ running=false;
+ message.textContent="GAME OVER! Final score: "+score;
+}
+
+draw();
+</script>
+</body>
+</html>
