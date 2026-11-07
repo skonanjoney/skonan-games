@@ -188,10 +188,11 @@ footer .wrap {display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap
     <nav>
       <a class="logo" href="#">SKONAN <span>GAMES</span></a>
       <div class="links">
-        <a href="#games">Games</a>
-        <a href="#roadmap">Roadmap</a>
-        <a href="#about">About</a>
-      </div>
+  <a href="#games-2d">2D Games</a>
+  <a href="#games-3d">3D Games</a>
+  <a href="#roadmap">Roadmap</a>
+  <a href="#about">About</a>
+</div>
     </nav>
   </div>
 </header>
@@ -213,61 +214,74 @@ footer .wrap {display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap
     <div class="art">🎮</div>
   </div>
 
-  <section id="games">
-    <div class="eyebrow">THE COLLECTION</div>
-    <h2>Our Games</h2>
-    <p class="muted">Find a game and start playing.</p>
+  
+<section id="games">
+  <div class="eyebrow">THE COLLECTION</div>
+  <h2>Our Gaming Universe</h2>
+  <p class="muted">Explore our 2D and 3D gaming worlds.</p>
 
-    <div class="tools">
-      <input id="search" type="search" placeholder="Search games...">
-      <div class="filters">
-        <button class="active" data-filter="all">All</button>
-        <button data-filter="puzzle">Puzzle</button>
-        <button data-filter="arcade">Arcade</button>
-        <button data-filter="strategy">Strategy</button>
-      </div>
+  <div class="tools">
+    <input id="search" type="search" placeholder="Search games...">
+    <div class="filters">
+      <button class="active" data-filter="all">All</button>
+      <button data-filter="puzzle">Puzzle</button>
+      <button data-filter="arcade">Arcade</button>
+      <button data-filter="strategy">Strategy</button>
     </div>
+  </div>
 
-    
-<div class="grid" id="gameGrid">
+  <!-- 2D GAMING WORLD -->
+  <div id="games-2d">
+    <div class="eyebrow">DIMENSION 01</div>
+    <h2>🎮 SKONAN 2D WORLD</h2>
+    <p class="muted">Classic and modern 2D browser games.</p>
 
-  <!-- SKONAN SUDOKU -->
-  <article class="card" data-name="skonan sudoku" data-category="puzzle">
-    <div class="game-art">🔥</div>
-    <div class="card-body">
-      <div class="status">● AVAILABLE NOW</div>
-      <h3>SKONAN Sudoku</h3>
-      <p>Challenge your brain with our 9×9 Sudoku puzzle game.</p>
-      <a class="play" href="games/SKONAN_SUDOKU.html">▶ PLAY NOW</a>
-    </div>
-  </article>
+    <div class="grid">
 
-  <!-- SKONAN SNAKE -->
-  <article class="card" data-name="skonan snake" data-category="arcade">
-    <div class="game-art">🐍</div>
-    <div class="card-body">
-      <div class="status">● AVAILABLE NOW</div>
-      <h3>SKONAN Snake</h3>
-      <p>Eat, grow and survive in our futuristic neon snake arcade game.</p>
-      <a class="play" href="games/SKONAN_SNAKE.html">▶ PLAY NOW</a>
-    </div>
-  </article>
-
-</div>
-
-      <article class="card" data-name="future game" data-category="strategy">
-        <div class="game-art">🚀</div>
+      <article class="card" data-name="skonan sudoku" data-category="puzzle">
+        <div class="game-art">🔥</div>
         <div class="card-body">
-          <div class="status soon">IN DEVELOPMENT</div>
-          <h3>Future Game</h3>
-          <p>Our next gaming adventure will appear here.</p>
-          <span class="play disabled">IN DEVELOPMENT</span>
+          <div class="status">● AVAILABLE NOW · 2D</div>
+          <h3>SKONAN Sudoku</h3>
+          <p>Challenge your brain with our 9×9 Sudoku puzzle game.</p>
+          <a class="play" href="games/SKONAN_SUDOKU.html">▶ PLAY NOW</a>
+        </div>
+      </article>
+
+      <article class="card" data-name="skonan snake" data-category="arcade">
+        <div class="game-art">🐍</div>
+        <div class="card-body">
+          <div class="status">● AVAILABLE NOW · 2D</div>
+          <h3>SKONAN Snake</h3>
+          <p>Eat, grow and survive in our futuristic neon snake game.</p>
+          <a class="play" href="games/SKONAN_SNAKE.html">▶ PLAY NOW</a>
         </div>
       </article>
 
     </div>
-    <div id="empty">No matching games found.</div>
-  </section>
+  </div>
+
+  <!-- 3D GAMING WORLD -->
+  <div id="games-3d" style="margin-top:65px">
+    <div class="eyebrow">DIMENSION 02</div>
+    <h2>🌌 SKONAN 3D WORLD</h2>
+    <p class="muted">Explore immersive three-dimensional gaming experiences.</p>
+
+    <div class="grid">
+      <article class="card" data-name="skonan 3d world" data-category="strategy">
+        <div class="game-art">🚀</div>
+        <div class="card-body">
+          <div class="status soon">COMING SOON · 3D</div>
+          <h3>SKONAN 3D Universe</h3>
+          <p>A new dimension of adventures, exploration and interactive 3D games.</p>
+          <span class="play disabled">COMING SOON</span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div id="empty">No matching games found.</div>
+</section>
 
   <section id="roadmap">
     <div class="eyebrow">OUR JOURNEY</div>
