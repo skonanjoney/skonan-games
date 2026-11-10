@@ -93,9 +93,9 @@ function road(){
  for(let i=0;i<18;i++){
   let x=i*45;
   let height=35+(i*37%70);
-  ctx.fillStyle=i%2?"#121c3b":"#192448";
+  ctx.fillStyle=world.road;
   ctx.fillRect(x,105-height,30,height);
-  ctx.fillStyle="#00eaff";
+  ctx.fillStyle=world.light;
   for(let y=110-height;y<100;y+=15)ctx.fillRect(x+7,y,3,4);
  }
 
@@ -126,6 +126,11 @@ function road(){
   ctx.lineTo(center+width*2,y);
   ctx.stroke();
  }
+ // Current world name
+ ctx.textAlign="center";
+ ctx.fillStyle=world.light;
+ ctx.font="bold 18px Arial";
+ ctx.fillText(world.name,350,35);
 }
 
 function laneX(lane,y){
