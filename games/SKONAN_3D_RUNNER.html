@@ -53,6 +53,13 @@ const W=700,H=450;
 let player={lane:0,jump:0,vy:0};
 let objects=[];
 let score=0,coins=0,level=1;
+const worlds=[
+ {name:"NEON CITY",bg:"#080d1e",road:"#101b3a",light:"#00eaff"},
+ {name:"CYBER HIGHWAY",bg:"#071522",road:"#102c42",light:"#00ff99"},
+ {name:"LAVA ZONE",bg:"#200909",road:"#401515",light:"#ff642e"},
+ {name:"ALIEN WORLD",bg:"#160b2b",road:"#281447",light:"#c084fc"},
+ {name:"SPACE STATION",bg:"#050817",road:"#17203b",light:"#ffffff"}
+];
 let highScore=Number(localStorage.getItem("skonanRunnerHighScore"))||0;
 let running=false,over=false;
 let shield=0,shieldTimer=0;
@@ -78,7 +85,9 @@ function beep(freq=500,duration=.08){
 }
 
 function road(){
- ctx.fillStyle="#080d1e";ctx.fillRect(0,0,W,H);
+ const world=worlds[Math.min(level-1,4)];
+ ctx.fillStyle=world.bg;
+ ctx.fillRect(0,0,W,H);
 
  // distant skyline
  for(let i=0;i<18;i++){
@@ -91,13 +100,13 @@ function road(){
  }
 
  // perspective road
- ctx.fillStyle="#101b3a";
+ ctx.fillStyle=world.road;
  ctx.beginPath();
  ctx.moveTo(265,100);ctx.lineTo(435,100);
  ctx.lineTo(650,450);ctx.lineTo(50,450);
  ctx.closePath();ctx.fill();
 
- ctx.strokeStyle="#00eaff";
+ ctx.strokeStyle=world.light;
  ctx.lineWidth=4;
  ctx.beginPath();
  ctx.moveTo(265,100);ctx.lineTo(50,450);
