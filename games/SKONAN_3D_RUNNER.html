@@ -141,37 +141,96 @@ function laneX(lane,y){
 function drawPlayer(){
  let x=laneX(player.lane,365);
  let y=365-player.jump;
-
- // shadow
- ctx.fillStyle="#0008";
- ctx.beginPath();ctx.ellipse(x,390,23,8,0,0,Math.PI*2);ctx.fill();
-
- // legs
- ctx.strokeStyle="#00eaff";ctx.lineWidth=9;ctx.lineCap="round";
  let swing=Math.sin(frame*.22)*9;
+
+ // Ground shadow
+ ctx.fillStyle="#0008";
  ctx.beginPath();
- ctx.moveTo(x-7,y+10);ctx.lineTo(x-10+swing,y+29);
- ctx.moveTo(x+7,y+10);ctx.lineTo(x+10-swing,y+29);
+ ctx.ellipse(x,390,24,8,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Legs
+ ctx.lineCap="round";
+ ctx.lineWidth=8;
+ ctx.strokeStyle="#172d50";
+ ctx.beginPath();
+ ctx.moveTo(x-6,y+13);
+ ctx.lineTo(x-10+swing,y+31);
+ ctx.moveTo(x+6,y+13);
+ ctx.lineTo(x+10-swing,y+31);
  ctx.stroke();
 
- // body
- ctx.fillStyle="#123d65";
- ctx.fillRect(x-13,y-12,26,28);
- ctx.strokeStyle="#00eaff";ctx.lineWidth=3;
- ctx.strokeRect(x-13,y-12,26,28);
-
- // head and helmet
- ctx.fillStyle="#e5f5ff";
- ctx.beginPath();ctx.arc(x,y-24,12,0,Math.PI*2);ctx.fill();
+ // Running shoes
  ctx.fillStyle="#00eaff";
- ctx.fillRect(x-10,y-28,20,6);
+ ctx.fillRect(x-19+swing,y+28,13,6);
+ ctx.fillRect(x+6-swing,y+28,13,6);
 
- // shield aura
+ // Arms
+ ctx.lineWidth=7;
+ ctx.strokeStyle="#e5b58d";
+ ctx.beginPath();
+ ctx.moveTo(x-12,y-8);
+ ctx.lineTo(x-20-swing,y+8);
+ ctx.moveTo(x+12,y-8);
+ ctx.lineTo(x+20+swing,y+8);
+ ctx.stroke();
+
+ // Hands
+ ctx.fillStyle="#f2c49d";
+ ctx.beginPath();
+ ctx.arc(x-20-swing,y+9,4,0,Math.PI*2);
+ ctx.arc(x+20+swing,y+9,4,0,Math.PI*2);
+ ctx.fill();
+
+ // Body / futuristic jacket
+ ctx.fillStyle="#123d65";
+ ctx.fillRect(x-13,y-15,26,30);
+ ctx.strokeStyle="#00eaff";
+ ctx.lineWidth=2;
+ ctx.strokeRect(x-13,y-15,26,30);
+
+ // Jacket details
+ ctx.fillStyle="#00eaff";
+ ctx.fillRect(x-2,y-12,4,22);
+
+ // Neck
+ ctx.fillStyle="#e5b58d";
+ ctx.fillRect(x-4,y-22,8,9);
+
+ // Head
+ ctx.fillStyle="#f2c49d";
+ ctx.beginPath();
+ ctx.arc(x,y-31,12,0,Math.PI*2);
+ ctx.fill();
+
+ // Hair
+ ctx.fillStyle="#172033";
+ ctx.beginPath();
+ ctx.arc(x,y-35,12,Math.PI,Math.PI*2);
+ ctx.fill();
+ ctx.fillRect(x-11,y-35,4,8);
+
+ // Eyes
+ ctx.fillStyle="#172033";
+ ctx.fillRect(x-5,y-32,2,3);
+ ctx.fillRect(x+4,y-32,2,3);
+
+ // Futuristic visor
+ ctx.strokeStyle="#00eaff";
+ ctx.lineWidth=2;
+ ctx.strokeRect(x-10,y-35,20,7);
+
+ // Shield aura
  if(shield>0){
-  ctx.strokeStyle="#a855f7";ctx.lineWidth=4;
-  ctx.beginPath();ctx.arc(x,y,39,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle="#a855f7";
+  ctx.lineWidth=4;
+  ctx.beginPath();
+  ctx.arc(x,y,39,0,Math.PI*2);
+  ctx.stroke();
  }
 }
+
+
 
 function drawObject(o){
  let x=laneX(o.lane,o.y);
