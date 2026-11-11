@@ -1,1 +1,58 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b18">
+<title>SKONAN RACING</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="game">
+
+  <header class="top-bar">
+    <div class="logo">SKONAN <span>RACING</span></div>
+    <div class="status">3D STREET RACING</div>
+  </header>
+
+  <div id="hud">
+    <div class="hud-box">
+      <small>SPEED</small>
+      <div><span id="speed">0</span> <small>KM/H</small></div>
+    </div>
+
+    <div class="hud-box">
+      <small>DISTANCE</small>
+      <div><span id="distance">0</span> <small>M</small></div>
+    </div>
+
+    <div class="hud-box">
+      <small>GEAR</small>
+      <div id="gear">1</div>
+    </div>
+  </div>
+
+  <div id="loading">LOADING RACING WORLD...</div>
+
+  <div id="controls">
+    <button id="left">◀</button>
+    <button id="nitro">NITRO</button>
+    <button id="right">▶</button>
+  </div>
+
+  <div id="instructions">
+    W / ↑ ACCELERATE &nbsp; S / ↓ BRAKE
+    <br>
+    A / ← LEFT &nbsp; D / → RIGHT
+  </div>
+
+</div>
+
+<script type="module" src="game.js"></script>
+
+</body>
+</html>
+
