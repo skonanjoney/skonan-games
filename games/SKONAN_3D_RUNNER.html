@@ -137,96 +137,180 @@ function laneX(lane,y){
  let t=(y-100)/350;
  return 350+lane*(25+t*95);
 }
-
 function drawPlayer(){
  let x=laneX(player.lane,365);
  let y=365-player.jump;
- let swing=Math.sin(frame*.22)*9;
+
+ // Running animation
+ let swing=Math.sin(frame*.22)*8;
+ let armSwing=Math.sin(frame*.22)*10;
 
  // Ground shadow
- ctx.fillStyle="#0008";
+ ctx.fillStyle="rgba(0,0,0,.45)";
  ctx.beginPath();
- ctx.ellipse(x,390,24,8,0,0,Math.PI*2);
+ ctx.ellipse(x,392,25,8,0,0,Math.PI*2);
  ctx.fill();
 
- // Legs
+ // Back leg
+ ctx.strokeStyle="#202b3d";
+ ctx.lineWidth=10;
  ctx.lineCap="round";
- ctx.lineWidth=8;
- ctx.strokeStyle="#172d50";
  ctx.beginPath();
- ctx.moveTo(x-6,y+13);
- ctx.lineTo(x-10+swing,y+31);
- ctx.moveTo(x+6,y+13);
- ctx.lineTo(x+10-swing,y+31);
+ ctx.moveTo(x+5,y+18);
+ ctx.lineTo(x+11-swing,y+42);
  ctx.stroke();
 
- // Running shoes
- ctx.fillStyle="#00eaff";
- ctx.fillRect(x-19+swing,y+28,13,6);
- ctx.fillRect(x+6-swing,y+28,13,6);
-
- // Arms
- ctx.lineWidth=7;
- ctx.strokeStyle="#e5b58d";
+ // Front leg
  ctx.beginPath();
- ctx.moveTo(x-12,y-8);
- ctx.lineTo(x-20-swing,y+8);
- ctx.moveTo(x+12,y-8);
- ctx.lineTo(x+20+swing,y+8);
+ ctx.moveTo(x-5,y+18);
+ ctx.lineTo(x-12+swing,y+42);
+ ctx.stroke();
+
+ // Shoes
+ ctx.fillStyle="#101827";
+ ctx.beginPath();
+ ctx.roundRect(x-22+swing,y+38,16,7,4);
+ ctx.roundRect(x+7-swing,y+38,17,7,4);
+ ctx.fill();
+
+ // Shoe neon soles
+ ctx.fillStyle="#00eaff";
+ ctx.fillRect(x-21+swing,y+44,15,2);
+ ctx.fillRect(x+8-swing,y+44,16,2);
+
+ // Back arm
+ ctx.strokeStyle="#b97855";
+ ctx.lineWidth=8;
+ ctx.beginPath();
+ ctx.moveTo(x+12,y-5);
+ ctx.lineTo(x+22-armSwing,y+14);
+ ctx.stroke();
+
+ // Front arm
+ ctx.beginPath();
+ ctx.moveTo(x-12,y-5);
+ ctx.lineTo(x-22+armSwing,y+14);
  ctx.stroke();
 
  // Hands
- ctx.fillStyle="#f2c49d";
+ ctx.fillStyle="#d99a76";
  ctx.beginPath();
- ctx.arc(x-20-swing,y+9,4,0,Math.PI*2);
- ctx.arc(x+20+swing,y+9,4,0,Math.PI*2);
+ ctx.arc(x+22-armSwing,y+16,5,0,Math.PI*2);
+ ctx.arc(x-22+armSwing,y+16,5,0,Math.PI*2);
  ctx.fill();
 
- // Body / futuristic jacket
- ctx.fillStyle="#123d65";
- ctx.fillRect(x-13,y-15,26,30);
+ // Torso / jacket
+ ctx.fillStyle="#172b48";
+ ctx.beginPath();
+ ctx.roundRect(x-16,y-18,32,38,7);
+ ctx.fill();
+
+ // Jacket outline
  ctx.strokeStyle="#00eaff";
  ctx.lineWidth=2;
- ctx.strokeRect(x-13,y-15,26,30);
+ ctx.stroke();
 
- // Jacket details
+ // Jacket center zipper
  ctx.fillStyle="#00eaff";
- ctx.fillRect(x-2,y-12,4,22);
+ ctx.fillRect(x-1,y-16,2,31);
+
+ // Shoulder panels
+ ctx.fillStyle="#244c73";
+ ctx.fillRect(x-16,y-15,8,9);
+ ctx.fillRect(x+8,y-15,8,9);
+
+ // Chest emblem
+ ctx.fillStyle="#8b5cf6";
+ ctx.beginPath();
+ ctx.arc(x,y-3,4,0,Math.PI*2);
+ ctx.fill();
 
  // Neck
- ctx.fillStyle="#e5b58d";
- ctx.fillRect(x-4,y-22,8,9);
+ ctx.fillStyle="#d99a76";
+ ctx.fillRect(x-5,y-25,10,10);
 
  // Head
- ctx.fillStyle="#f2c49d";
+ ctx.fillStyle="#d99a76";
  ctx.beginPath();
- ctx.arc(x,y-31,12,0,Math.PI*2);
+ ctx.arc(x,y-36,14,0,Math.PI*2);
+ ctx.fill();
+
+ // Ears
+ ctx.beginPath();
+ ctx.arc(x-14,y-36,3,0,Math.PI*2);
+ ctx.arc(x+14,y-36,3,0,Math.PI*2);
  ctx.fill();
 
  // Hair
- ctx.fillStyle="#172033";
+ ctx.fillStyle="#111827";
  ctx.beginPath();
- ctx.arc(x,y-35,12,Math.PI,Math.PI*2);
+ ctx.arc(x,y-41,14,Math.PI,Math.PI*2);
  ctx.fill();
- ctx.fillRect(x-11,y-35,4,8);
+
+ // Hair sides
+ ctx.fillRect(x-13,y-43,5,10);
+ ctx.fillRect(x+8,y-43,5,10);
+
+ // Eyebrows
+ ctx.strokeStyle="#542f25";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.moveTo(x-8,y-38);
+ ctx.lineTo(x-3,y-39);
+ ctx.moveTo(x+3,y-39);
+ ctx.lineTo(x+8,y-38);
+ ctx.stroke();
 
  // Eyes
- ctx.fillStyle="#172033";
- ctx.fillRect(x-5,y-32,2,3);
- ctx.fillRect(x+4,y-32,2,3);
+ ctx.fillStyle="#111827";
+ ctx.beginPath();
+ ctx.arc(x-5,y-35,1.8,0,Math.PI*2);
+ ctx.arc(x+5,y-35,1.8,0,Math.PI*2);
+ ctx.fill();
+
+ // Nose
+ ctx.strokeStyle="#a65f45";
+ ctx.lineWidth=1.5;
+ ctx.beginPath();
+ ctx.moveTo(x,y-34);
+ ctx.lineTo(x-1,y-29);
+ ctx.lineTo(x+2,y-29);
+ ctx.stroke();
+
+ // Mouth
+ ctx.beginPath();
+ ctx.moveTo(x-4,y-25);
+ ctx.quadraticCurveTo(x,y-23,x+4,y-25);
+ ctx.stroke();
 
  // Futuristic visor
  ctx.strokeStyle="#00eaff";
  ctx.lineWidth=2;
- ctx.strokeRect(x-10,y-35,20,7);
+ ctx.fillStyle="rgba(0,234,255,.12)";
+ ctx.beginPath();
+ ctx.roundRect(x-12,y-39,24,9,4);
+ ctx.fill();
+ ctx.stroke();
 
- // Shield aura
+ // Neck collar
+ ctx.strokeStyle="#8b5cf6";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.arc(x,y-22,7,0,Math.PI);
+ ctx.stroke();
+
+ // Shield
  if(shield>0){
   ctx.strokeStyle="#a855f7";
   ctx.lineWidth=4;
   ctx.beginPath();
-  ctx.arc(x,y,39,0,Math.PI*2);
+  ctx.arc(x,y-10,43,0,Math.PI*2);
   ctx.stroke();
+
+  ctx.fillStyle="rgba(168,85,247,.08)";
+  ctx.beginPath();
+  ctx.arc(x,y-10,43,0,Math.PI*2);
+  ctx.fill();
  }
 }
 
