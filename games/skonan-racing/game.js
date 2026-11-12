@@ -98,7 +98,7 @@ for (let lane = -1; lane <= 1; lane++) {
     if (lane === 0 && i % 1 !== 0) continue;
 
     const dash = new THREE.Mesh(
-      new BoxGeometry(0.09, 0.025, 3),
+      new THREE.BoxGeometry(0.09, 0.025, 3),
       lineMat
     );
 
@@ -120,7 +120,7 @@ for (let side of [-1, 1]) {
     const width = 3 + Math.random() * 4;
 
     const building = new THREE.Mesh(
-      new BoxGeometry(width, height, 5 + Math.random() * 5),
+      new THREE.BoxGeometry(width, height, 5 + Math.random() * 5),
       buildingMats[i % buildingMats.length]
     );
 
@@ -134,7 +134,7 @@ for (let side of [-1, 1]) {
 
     // Building windows
     const windows = new THREE.Mesh(
-      new BoxGeometry(width * 0.65, 0.12, 0.04),
+      new THREE.BoxGeometry(width * 0.65, 0.12, 0.04),
       new THREE.MeshBasicMaterial({
         color: i % 2 ? 0x00cfff : 0xffc857
       })
@@ -160,7 +160,7 @@ car.position.set(0, 0, 3);
 
 // Main body
 const body = new THREE.Mesh(
-  new BoxGeometry(1.9, 0.55, 4),
+  new THREE.BoxGeometry(1.9, 0.55, 4),
   new THREE.MeshStandardMaterial({
     color: 0xd90032,
     metalness: 0.65,
@@ -173,7 +173,7 @@ car.add(body);
 
 // Hood
 const hood = new THREE.Mesh(
-  new BoxGeometry(1.8, 0.2, 1.2),
+  new THREE.BoxGeometry(1.8, 0.2, 1.2),
   new THREE.MeshStandardMaterial({
     color: 0xff174c,
     metalness: 0.6
@@ -185,7 +185,7 @@ car.add(hood);
 
 // Roof
 const roof = new THREE.Mesh(
-  new BoxGeometry(1.5, 0.7, 1.8),
+  new THREE.BoxGeometry(1.5, 0.7, 1.8),
   new THREE.MeshStandardMaterial({
     color: 0x111b2e,
     metalness: 0.4,
@@ -198,7 +198,7 @@ car.add(roof);
 
 // Front windscreen
 const windshield = new THREE.Mesh(
-  new BoxGeometry(1.42, 0.48, 0.06),
+  new THREE.BoxGeometry(1.42, 0.48, 0.06),
   new THREE.MeshBasicMaterial({
     color: 0x72b8d9
   })
@@ -211,7 +211,7 @@ car.add(windshield);
 for (let x of [-0.65, 0.65]) {
 
   const headlight = new THREE.Mesh(
-    new BoxGeometry(0.38, 0.16, 0.08),
+    new THREE.BoxGeometry(0.38, 0.16, 0.08),
     new THREE.MeshBasicMaterial({ color: 0xc9f5ff })
   );
 
@@ -219,7 +219,7 @@ for (let x of [-0.65, 0.65]) {
   car.add(headlight);
 
   const rearLight = new THREE.Mesh(
-    new BoxGeometry(0.4, 0.15, 0.08),
+    new THREE.BoxGeometry(0.4, 0.15, 0.08),
     new THREE.MeshBasicMaterial({ color: 0xff001c })
   );
 
@@ -234,7 +234,7 @@ for (let x of [-1, 1]) {
   for (let z of [-1.3, 1.3]) {
 
     const wheel = new THREE.Mesh(
-      new CylinderGeometry(0.42, 0.42, 0.28, 12),
+      new THREE.CylinderGeometry(0.42, 0.42, 0.28, 12),
       new THREE.MeshStandardMaterial({
         color: 0x090a0d,
         roughness: 0.8
